@@ -1,10 +1,11 @@
-# A Markov-blanket organ that grows from one cell, and what it can repair
+# Embryogenesis: a Markov-blanket organ that grows from one cell and repairs itself
 
 A Python port of the hierarchical self-organisation model of Palacios, Razi, Parr, Kirchhoff
 and Friston (2020), extended so that the organ *grows*: one cell becomes a blanket of 16, the
 blanket's whole bears 15 more, and the organ of 16 blankets (256 cells) holds its form by
-regenerating what it loses and replacing what it cannot correct.  This folder is the closing
-configuration of that work and the perturbation suite that tests it, with nothing else.
+regenerating what it loses and replacing what it cannot correct.
+
+![An untouched run](figures_and_animations/animations/untouched_run.gif)
 
 ## The model in five lines
 
@@ -22,6 +23,8 @@ configuration of that work and the perturbation suite that tests it, with nothin
 
 What is given from above: the target (1, 6, 9), the two radii, and the turnover and pull rules
 (applied between steps, not gradients of the free energy).  Everything else is the descent.
+`helpful_diagrams/` draws the generative process `Gg`, the generative model `Mg`, and the loop
+between a blanket and its cells.
 
 ## Files
 
@@ -34,6 +37,8 @@ What is given from above: the target (1, 6, 9), the two radii, and the turnover 
 | `gif.py` | GIFs of blanket 0 or the whole organ |
 | `run_suite.sh` | the 12-configuration suite, then figure and GIFs |
 | `check_same.py` | are two run JSONs the same run, to the last bit? |
+| `figures_and_animations/` | `animations/`: the untouched run and the five tests below; `graphs/`: the suite figures |
+| `helpful_diagrams/` | `Gg`, `Mg` and the blanket–cell loop, drawn |
 
 Requirements: numpy, scipy, matplotlib (Pillow for the GIFs).  One run at 256 steps takes
 ~28 min and ~17 GB.
@@ -59,26 +64,38 @@ crosses it; cells still move).  `run_suite.sh` is the full set.
 Every one of the 100 runs ended with the organ at (1, 6, 9) in 16 ensembles.  For the blanket
 each event hit:
 
-| event | outcome |
-|---|---|
-| 3 cells' kind belief flipped | corrected within the step |
-| 3 cells' kind held (a mutation the cell cannot shed) | the misfits removed by turnover and replaced, (1,6,9) in 5 of 5 by step 156–181 |
-| 4 sensory cells removed | regrown in 13 steps, the holes filled |
-| the core removed | 3 steps without one; an inner cell bears a new core, the ring re-forms around it |
-| 2 ensembles removed | regrown: 16 ensembles in 8 steps, 256 cells in ~60 |
-| a signalling wall through the core, 20–100 / 60–140 / 150–200 | inner cells drift out and relabel while it stands; turnover repairs the mix, during the wall and after |
-| the same events at step 60, during growth | regeneration faster (a lost core resettles in 13 steps against 50) |
+| event | outcome | animation |
+|---|---|---|
+| 3 cells' kind belief flipped | corrected within the step | `flip_corrected.gif` |
+| 3 cells' kind held (a mutation the cell cannot shed) | the misfits removed by turnover and replaced, (1,6,9) in 5 of 5 by step 156–181 | `mutation_repaired.gif` |
+| 4 sensory cells removed | regrown in 13 steps, the holes filled | `regeneration_three_levels.gif` |
+| the core removed | 3 steps without one; an inner cell bears a new core, the ring re-forms around it | `regeneration_three_levels.gif`, `regeneration_young_vs_formed.gif` |
+| 2 ensembles removed | regrown: 16 ensembles in 8 steps, 256 cells in ~60 | `regeneration_three_levels.gif` |
+| a signalling wall through the core, 20–100 / 60–140 / 150–200 | inner cells drift out and relabel while it stands; turnover repairs the mix, during the wall and after | `wall_healed.gif` |
+| the same events at step 60, during growth | regeneration faster (a lost core resettles in 13 steps against 50) | `regeneration_young_vs_formed.gif` |
+
+![Regeneration at three levels](figures_and_animations/animations/regeneration_three_levels.gif)
 
 Repair has three timescales: identity in a step, composition in tens of steps, geometry in
 hundreds.  The one residue is the regrown core: the ring re-centres on it rather than it on the
 ring, and the ring stays uneven for the rest of a 512-step run.
+
+The graphs in `figures_and_animations/graphs/`: `suite_*.png` are `fig.py`'s figure for the
+formed organ, the events during growth and the repair, everything under turnover, and a
+512-step run (each panel the mean over seeds with the min–max band; dotted the event, dashed a
+wall up and down); `scars_without_and_with_turnover.png` and `regeneration_three_levels.png`
+are drawn from the same traces.
 
 ## Reproducibility
 
 Runs are deterministic: every random draw comes from the seed.  `check_same.py a.json b.json
 [--prefix]` compares two runs trajectory by trajectory with no tolerance.  This folder was cut
 from a larger research code base and checked against its traces: six runs covering every
-perturbation (seed 0 of dev_hold, wall_late, abl_core, abl_blanket2, mut_flip, abl_sen4, each
-run past its event) matched in every trajectory, event and birth.  Across machines the free
-energy's running sum differs in its 13th digit (BLAS kernels differ); the rounded trajectories
-still match.
+perturbation, each run past its event, matched in every trajectory, event and birth.  Across
+machines the free energy's running sum differs in its 13th digit (BLAS kernels differ); the
+rounded trajectories still match.
+
+## Reference
+
+Palacios, E. R., Razi, A., Parr, T., Kirchhoff, M., & Friston, K. (2020). On Markov blankets
+and hierarchical self-organisation. *Journal of Theoretical Biology*, 486, 110089.

@@ -4,7 +4,7 @@
     python3 gif.py results/abl_core_s0.json --from 144 --out abl_core.gif --title "blanket 0: its core removed at 150"
     python3 gif.py results/abl_blanket2_s0.json --organ --from 144 --out abl_blanket2.gif
     python3 gif.py results/abl_core_s0.json results/dev_core_s0.json --from 1 --out cores.gif    # one panel per run
-    python3 gif.py --suite results                                   # the five GIFs of the write-up into results/gifs/
+    python3 gif.py --suite results                                   # the five GIFs of figures_and_animations/ into results/gifs/
 
 Cells are coloured by kind (red core, blue active, grey sensory); dotted circles at radius 1 and 2
 from the core; + the blanket's centroid; an orange line is a signalling wall while it stands.  The
@@ -125,7 +125,7 @@ def main():
     ap.add_argument("--from", dest="t0", type=int, default=1); ap.add_argument("--to", dest="t1", type=int)
     ap.add_argument("--every", type=int, default=1); ap.add_argument("--fps", type=int, default=12)
     ap.add_argument("--title", default=""); ap.add_argument("--out", default="run.gif")
-    ap.add_argument("--suite", metavar="RESULTS", help="make the write-up's five GIFs from this results folder")
+    ap.add_argument("--suite", metavar="RESULTS", help="make the five GIFs of figures_and_animations/ from this results folder")
     ap.add_argument("--seed", type=int, default=0)
     a = ap.parse_args()
     if a.suite:

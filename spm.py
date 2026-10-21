@@ -1,8 +1,7 @@
 """spm.py -- the SPM12 primitives the ADEM step uses, ported one branch each
 (spm_speye, spm_DEM_R, spm_DEM_embed, spm_diff, spm_logdet, spm_inv, spm_dx).
-spm_dx always builds the augmented matrix sparse and seeds the global generator
-around expm_multiply (its 1-norm estimate draws from it), so a run is reproducible
-bit for bit.  Same arithmetic as spm_min2.py, the alternatives removed."""
+spm_dx builds its augmented matrix sparse and seeds the global generator around
+expm_multiply (its 1-norm estimate draws from it), so a run is reproducible bit for bit."""
 import math
 import numpy as np
 import scipy.sparse as sp

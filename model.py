@@ -1,7 +1,7 @@
-"""model.py -- the closing configuration of the growth chapter, with the perturbations of its test suite.
+"""model.py -- a Markov-blanket organ grown from one cell, and the perturbations that test it.
 
-An organ of 16 ensembles grown from one, every ensemble a blanket of cells grown from one zygote.
-Every agent runs the same ADEM step (Palacios et al. 2020, ported).  Beyond the paper:
+An organ of 16 ensembles grown from one, every ensemble a blanket of 16 cells grown from one zygote.
+Every agent runs the same ADEM step (Palacios et al. 2020, ported in spm.py).  Beyond the paper:
   - a blanket's emission into the organ is its cells' secreted views, one unit per cell / 16
     (a head count); a blanket short of its unit for TAU steps bears one daughter cell
   - the body counts the organ's ensembles the same way; short of a unit, one ensemble divides
@@ -10,12 +10,12 @@ Every agent runs the same ADEM step (Palacios et al. 2020, ported).  Beyond the 
     toward its own self-view (consensus), and its error moves that cell's secreted view
   - daughters are born on a circle at BIRTH_R around their core, in the widest gap of their
     kind; every step each cell (ensemble) is drawn 5% of the way to the radius of its kind
-  - the organ's fingerprint: an active ensemble expects 0.11 of active signal (the cure)
-  - turnover (step 22): a complete blanket with too many of one kind sheds its least integrated
-    cell of that kind, and the ordinary birth replaces it as the kind the blanket lacks
+  - the organ's fingerprint: an active ensemble expects 0.11 of active signal, less than the
+    paper's 0.276, so a complete ring of blankets does not relabel itself
+  - turnover: a complete blanket with too many of one kind sheds its least integrated cell of
+    that kind, and the ordinary birth replaces it as the kind the blanket lacks
 Perturbations (run's keyword arguments; none by default): cells of blanket 0 removed, its core
 removed, whole ensembles removed, cells' kinds flipped or held, a signalling wall through the organ.
-Reduced from dem_grow2.py with every alternative removed; the run path is unchanged.
 """
 import time
 import numpy as np
@@ -24,13 +24,13 @@ from scipy.linalg import cho_factor, LinAlgError
 
 from spm import spm_speye, spm_DEM_R, spm_DEM_embed, spm_diff_vec, spm_logdet, spm_inv, spm_dx, to_csr
 
-# ---- the paper's constants --------------------------------------------------------------
+# ---- the paper's constants ---------------------------------------------------------------
 E_d, E_n, E_s, E_dt = 1, 2, 1, 2        # DEM: approximation order, embedding order, smoothness, dt
 N_TYPE = np.array([1, 6, 9])            # internal, active, sensory in a formed blanket
 R_RAD = np.array([0.0, 1.0, 3.0])       # their radii in the paper's template
 K_DECAY = 2.0                           # the field kernel exp(-2 d^2)
 NG = 16                                 # ensembles the paper's organ is drawn with
-# ---- the closing configuration ----------------------------------------------------------
+# ---- this model's ------------------------------------------------------------------------
 Q = 16.0                                # cells per blanket unit; ensembles per body unit
 CELL_SCALE = 0.05                       # a blanket's radius in the organ's units
 EMIT_FLOOR = 0.25                       # least loudness a cell is normalised by (head count)
@@ -41,7 +41,7 @@ ORGAN_BIAS = 0.5                        # the organ's seeding belief (the paper'
 POS_BIAS, POS_NOISE, SPREAD = 0.5, 0.125, 0.5   # the organ's seeding positions; the zygote's
 PRIOR_PREC, PRIOR_FLOOR = np.exp(4.0), np.exp(-4.0)   # a core's prior; everyone else's
 ORGAN_FATE_PREC = np.exp(1.0)           # a daughter ensemble's fate prior, for life
-ORGAN_FP_ACT = 0.11                     # the organ's cure: an active ensemble expects this much active signal
+ORGAN_FP_ACT = 0.11                     # an active ensemble expects this much active signal (the paper's template: 0.276)
 BIRTH_R = 1.3                           # where a daughter (cell or ensemble) is born, from her core
 PULL_R = (1.0, 2.0)                     # the radius of an active, of a sensory
 PULL = 0.05                             # fraction of the way to that radius per step
@@ -61,7 +61,7 @@ def foxhound(x, y, k=K_DECAY):
     d = ((x[:, :, None] - x[:, None, :]) ** 2).sum(axis=0)
     W = np.exp(-k * d)
     np.fill_diagonal(W, 0.0)
-    return np.ascontiguousarray(y) @ W.T       # C-order: the sweep code's hstack gave BLAS the same layout (last bits)
+    return np.ascontiguousarray(y) @ W.T       # a fixed memory layout: BLAS then sums in the same order every time
 
 
 def foxhound_wall(x, y, side, k=K_DECAY):
@@ -89,7 +89,7 @@ def build_priors():
     typ = np.array(typ)
     T = np.zeros((3, N_TYPE.sum()))
     T[typ, np.arange(N_TYPE.sum())] = 1.0
-    sen = np.zeros_like(T)                    # the port's cell-by-cell sum (its last bits differ from foxhound's)
+    sen = np.zeros_like(T)                    # summed cell by cell, as the original code does
     for i in range(T.shape[1]):
         for j in range(T.shape[1]):
             if i != j:
