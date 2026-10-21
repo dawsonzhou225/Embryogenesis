@@ -3,13 +3,17 @@
 A Python port of the hierarchical self-organisation model of Palacios, Razi, Parr, Kirchhoff
 and Friston (2020), extended so that the organ *grows*: one cell becomes a blanket of 16, the
 blanket's whole bears 15 more, and the organ of 16 blankets (256 cells) holds its form by
-regenerating what it loses and replacing what it cannot correct.
+regenerating what it loses and replacing what it cannot correct.  The project started with
+Hofstadter's *Gödel, Escher, Bach*: I wanted to build a self-referencing, cross-level strange
+loop, a whole whose identity is made of its parts' beliefs about it, and whose beliefs about
+itself reach back down into those parts.  The paper's Markov blankets gave the levels; the
+loop is what the extensions add.
 
 ![An untouched run](figures_and_animations/animations/untouched_run.gif)
 
 ## The model in five lines
 
-- Every agent — cell, blanket, organ — runs the same step: an action-driven DEM (dynamic
+- Every agent (cell, blanket, organ) runs the same step: an action-driven DEM (dynamic
   expectation maximisation) descent on one free energy, the paper's ADEM, ported in `spm.py`.
 - A cell's kind (internal, active, sensory) is a belief, read off the signalling field it
   senses each step; the field is produced by every cell's secreted belief (`Gg`, `Mg`).
@@ -38,7 +42,7 @@ between a blanket and its cells.
 | `run_suite.sh` | the 12-configuration suite, then figure and GIFs |
 | `check_same.py` | are two run JSONs the same run, to the last bit? |
 | `figures_and_animations/` | `animations/`: the untouched run and the five tests below; `graphs/`: the suite figures |
-| `helpful_diagrams/` | `Gg`, `Mg` and the blanket–cell loop, drawn |
+| `helpful_diagrams/` | `Gg`, `Mg` and the blanket-cell loop, drawn |
 
 Requirements: numpy, scipy, matplotlib (Pillow for the GIFs).  One run at 256 steps takes
 ~28 min and ~17 GB.
@@ -67,11 +71,11 @@ each event hit:
 | event | outcome | animation |
 |---|---|---|
 | 3 cells' kind belief flipped | corrected within the step | `flip_corrected.gif` |
-| 3 cells' kind held (a mutation the cell cannot shed) | the misfits removed by turnover and replaced, (1,6,9) in 5 of 5 by step 156–181 | `mutation_repaired.gif` |
+| 3 cells' kind held (a mutation the cell cannot shed) | the misfits removed by turnover and replaced, (1,6,9) in 5 of 5 by step 156-181 | `mutation_repaired.gif` |
 | 4 sensory cells removed | regrown in 13 steps, the holes filled | `regeneration_three_levels.gif` |
 | the core removed | 3 steps without one; an inner cell bears a new core, the ring re-forms around it | `regeneration_three_levels.gif`, `regeneration_young_vs_formed.gif` |
 | 2 ensembles removed | regrown: 16 ensembles in 8 steps, 256 cells in ~60 | `regeneration_three_levels.gif` |
-| a signalling wall through the core, 20–100 / 60–140 / 150–200 | inner cells drift out and relabel while it stands; turnover repairs the mix, during the wall and after | `wall_healed.gif` |
+| a signalling wall through the core, 20-100 / 60-140 / 150-200 | inner cells drift out and relabel while it stands; turnover repairs the mix, during the wall and after | `wall_healed.gif` |
 | the same events at step 60, during growth | regeneration faster (a lost core resettles in 13 steps against 50) | `regeneration_young_vs_formed.gif` |
 
 ![Regeneration at three levels](figures_and_animations/animations/regeneration_three_levels.gif)
@@ -82,7 +86,7 @@ ring, and the ring stays uneven for the rest of a 512-step run.
 
 The graphs in `figures_and_animations/graphs/`: `suite_*.png` are `fig.py`'s figure for the
 formed organ, the events during growth and the repair, everything under turnover, and a
-512-step run (each panel the mean over seeds with the min–max band; dotted the event, dashed a
+512-step run (each panel the mean over seeds with the min-max band; dotted the event, dashed a
 wall up and down); `scars_without_and_with_turnover.png` and `regeneration_three_levels.png`
 are drawn from the same traces.
 
